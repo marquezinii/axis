@@ -3,8 +3,12 @@ mod models;
 mod skills;
 mod storage;
 
+use directories::BaseDirs;
 use models::{Dashboard, GithubInspection, InstallRequest, UpdateStatus};
-use std::{path::PathBuf, process::Command};
+use std::{
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 fn snapshot() -> Result<Dashboard, String> {
     let workspaces = storage::workspaces()?;
@@ -74,12 +78,37 @@ fn install_github(request: InstallRequest) -> Result<Dashboard, String> {
 fn check_updates() -> Result<Vec<UpdateStatus>, String> {
     skills::check_updates()
 }
+fn is_allowed_folder(path: &Path) -> Result<bool, String> {
+    if !path.is_dir() {
+        return Ok(false);
+    }
+    let workspaces = storage::workspaces()?;
+    let home = BaseDirs::new()
+        .map(|dirs| dirs.home_dir().to_path_buf())
+        .unwrap_or_default();
+    let mut roots = vec![storage::data_dir()?];
+    roots.extend(
+        workspaces
+            .into_iter()
+            .map(|workspace| PathBuf::from(workspace.path)),
+    );
+    for adapter in agents::adapters() {
+        roots.extend(adapter.config_paths(&home));
+        roots.extend(adapter.global_skill_paths(&home));
+    }
+
+    Ok(roots
+        .into_iter()
+        .filter_map(|root| std::fs::canonicalize(root).ok())
+        .any(|root| path.starts_with(root)))
+}
+
 #[tauri::command]
-fn open_path(path: String) -> Result<(), String> {
+fn open_managed_folder(path: String) -> Result<(), String> {
     let canonical =
         std::fs::canonicalize(&path).map_err(|_| "Folder no longer exists".to_string())?;
-    if !canonical.exists() {
-        return Err("Folder no longer exists".into());
+    if !is_allowed_folder(&canonical)? {
+        return Err("Only Axis-managed folders can be opened".into());
     }
     Command::new("explorer.exe")
         .arg(canonical)
@@ -104,7 +133,7 @@ pub fn run() {
             inspect_github,
             install_github,
             check_updates,
-            open_path
+            open_managed_folder
         ])
         .run(tauri::generate_context!())
         .expect("error while running Axis");

@@ -1,12 +1,12 @@
-# AXIS
+# Axis
 
-Local control center for AI coding agents.
+> Central de controle local, segura e em português para skills de agentes de programação com IA.
 
 Axis is a Windows desktop application that detects Codex, Claude Code, OpenCode and Antigravity, inventories their skills, and provides a safe local workflow for installing and tracking public GitHub skills.
 
-## Features
+## O que o Axis faz
 
-- Agent detection from known executables, configuration and skill locations
+- Detecção de agentes por executáveis, configuração e pastas conhecidas de skills, sem executar os binários detectados
 - Deduplicated global and workspace skill inventory
 - YAML frontmatter and Markdown inspection
 - Public GitHub repository and deep skill URL parsing
@@ -17,15 +17,11 @@ Axis is a Windows desktop application that detects Codex, Claude Code, OpenCode 
 - Explicit workspaces, sources, activity history and local settings
 - Keyboard navigation and `Ctrl+K` command palette
 
-## Screenshots
-
-Screenshots will be added after the first packaged release.
-
 ## Stack
 
 Tauri 2, Rust, React 19, TypeScript, Vite and SQLite.
 
-## Development
+## Desenvolvimento
 
 Prerequisites: Node.js, pnpm, Rust stable MSVC, Visual Studio C++ Build Tools and WebView2.
 
@@ -34,7 +30,7 @@ pnpm install
 pnpm tauri dev
 ```
 
-Validation and packaging:
+Validação e empacotamento:
 
 ```powershell
 pnpm check
@@ -44,13 +40,20 @@ cargo test --manifest-path src-tauri/Cargo.toml
 pnpm tauri build
 ```
 
-Use `pnpm release:local` for future local releases. It rebuilds the stable release executable and refreshes the Desktop shortcut. The shortcut targets `src-tauri/target/release/axis.exe`, so every successful rebuild updates the app it opens.
+Use `pnpm release:local` para as próximas versões locais. Ele recompila o executável estável e atualiza o atalho da Área de Trabalho. O atalho aponta para `src-tauri/target/release/axis.exe`; cada build bem-sucedida atualiza o app aberto por ele.
 
-## Architecture
+## Documentação
+
+- [Arquitetura](ARCHITECTURE.md)
+- [Contribuição](CONTRIBUTING.md)
+- [Segurança](SECURITY.md)
+- [Estado do projeto](PROJECT_STATE.md)
+
+## Arquitetura
 
 The React frontend only calls narrow Tauri commands. Rust adapters own agent conventions; the skills module owns discovery, GitHub staging, validation, hashing, installation and update checks; SQLite stores sources, workspaces, operations and managed installation provenance. App data is resolved through the operating system under LocalAppData—no personal path is hardcoded.
 
-## Security philosophy
+## Filosofia de segurança
 
 Skills are untrusted content. Axis never runs scripts found in a skill during discovery or installation. Archives are size-limited and extracted only through enclosed relative paths; links are rejected; existing unmanaged folders are never overwritten; managed local changes block replacement. See [SECURITY.md](SECURITY.md).
 

@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "check": "tsc --noEmit && vite build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "release:local": "tauri build && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-desktop-shortcut.ps1",
     "preview": "vite preview",
     "tauri": "tauri"
@@ -25,6 +27,7 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "typescript": "~5.8.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.4",
+    "prettier": "^3.5.3"
   }
 }
