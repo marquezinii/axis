@@ -41,11 +41,15 @@ pub fn parse_github_url(input: &str) -> Result<GithubRef, String> {
         .or_else(|| trimmed.strip_prefix("http://github.com/"))
         .unwrap_or(trimmed);
     let parts: Vec<_> = value.split('/').filter(|p| !p.is_empty()).collect();
-    if parts.len() < 2
-        || parts[0].contains('.')
-        || parts[0].contains('\\')
-        || parts[1].contains('\\')
-    {
+    let valid_slug = |value: &str| {
+        !value.is_empty()
+            && value != "."
+            && value != ".."
+            && value
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'))
+    };
+    if parts.len() < 2 || !valid_slug(parts[0]) || !valid_slug(parts[1]) {
         return Err("Enter a public GitHub repository or skill URL".into());
     }
     let (reference, path) = if parts.get(2) == Some(&"tree") && parts.len() >= 4 {
@@ -56,6 +60,13 @@ pub fn parse_github_url(input: &str) -> Result<GithubRef, String> {
     } else {
         (None, None)
     };
+    if path.as_deref().is_some_and(|value| {
+        Path::new(value)
+            .components()
+            .any(|part| !matches!(part, Component::Normal(_)))
+    }) {
+        return Err("The GitHub skill path is unsafe".into());
+    }
     Ok(GithubRef {
         owner: parts[0].into(),
         repo: parts[1].into(),
@@ -609,7 +620,8 @@ mod tests {
     }
     #[test]
     fn rejects_non_github_shape() {
-        assert!(parse_github_url("https://example.com/a").is_err())
+        assert!(parse_github_url("https://example.com/a").is_err());
+        assert!(parse_github_url("https://github.com/o/r/tree/main/../secret").is_err());
     }
     #[test]
     fn stable_hash_changes_with_content() {
