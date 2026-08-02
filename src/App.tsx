@@ -504,6 +504,42 @@ function App() {
     if (view === 'home')
       return (
         <>
+          <section className="command-deck">
+            <div className="command-deck-copy">
+              <span className="eyebrow">
+                <span className="live-pulse" /> Central local
+              </span>
+              <h2>
+                Seu ambiente de IA,
+                <br />
+                sob controle.
+              </h2>
+              <p>
+                Descubra agentes, acompanhe skills e mantenha tudo organizado sem enviar seus dados
+                para a nuvem.
+              </p>
+              <div className="deck-actions">
+                <Button kind="primary" busy={busy} onClick={rescan}>
+                  <Search size={17} /> Executar análise
+                </Button>
+                <Button onClick={() => setInstallOpen(true)}>
+                  <Plus size={17} /> Adicionar skill
+                </Button>
+              </div>
+            </div>
+            <div className="command-deck-status" aria-label="Estado do ambiente">
+              <span className="status-orbit">
+                <ShieldCheck size={25} />
+              </span>
+              <strong>Ambiente protegido</strong>
+              <small>Skills não são executadas durante a análise.</small>
+              <div>
+                <span>LOCAL</span>
+                <span>PRIVADO</span>
+                <span>PRONTO</span>
+              </div>
+            </div>
+          </section>
           <div className="stat-strip">
             <div>
               <Bot />
