@@ -1,62 +1,126 @@
 # Axis
 
-> Central de controle local, segura e em português para skills de agentes de programação com IA.
+<p align="center">
+  <img src="public/axis-icon.png" width="112" alt="Ícone do Axis" />
+</p>
 
-Axis is a Windows desktop application that detects Codex, Claude Code, OpenCode and Antigravity, inventories their skills, and provides a safe local workflow for installing and tracking public GitHub skills.
+<p align="center">
+  <strong>Central local para organizar agentes de IA, skills e projetos de desenvolvimento.</strong>
+</p>
 
-## O que o Axis faz
+<p align="center">
+  <a href="https://github.com/marquezinii/axis/actions"><img src="https://github.com/marquezinii/axis/actions/workflows/ci.yml/badge.svg" alt="Status do CI" /></a>
+  <img src="https://img.shields.io/badge/plataforma-Windows-0078D4?logo=windows&logoColor=white" alt="Windows" />
+  <img src="https://img.shields.io/badge/desktop-Tauri%202-24C8D8?logo=tauri&logoColor=white" alt="Tauri 2" />
+  <img src="https://img.shields.io/badge/idioma-Português%20(Brasil)-009C3B" alt="Português do Brasil" />
+</p>
 
-- Detecção de agentes por executáveis, configuração e pastas conhecidas de skills, sem executar os binários detectados
-- Deduplicated global and workspace skill inventory
-- YAML frontmatter and Markdown inspection
-- Public GitHub repository and deep skill URL parsing
-- Multi-skill repository discovery and multi-agent installation
-- Staging, archive limits, path validation, static risk inspection and atomic writes
-- Local Vault, SHA-256 content tracking, backups and local-change protection
-- Managed skill update checks against the tracked GitHub ref
-- Explicit workspaces, sources, activity history and local settings
-- Keyboard navigation and `Ctrl+K` command palette
+Axis reúne, em uma única aplicação local, a descoberta de agentes de programação com IA, o inventário de skills, a instalação segura de fontes públicas do GitHub e o acompanhamento de atualizações. O foco é simples: dar visibilidade e controle ao ambiente que já existe na sua máquina, sem exigir conta e sem enviar sua configuração para um serviço externo.
 
-## Stack
+## O que você consegue fazer
 
-Tauri 2, Rust, React 19, TypeScript, Vite and SQLite.
+- Detectar Codex, Claude Code, OpenCode e Antigravity a partir de configurações e caminhos conhecidos.
+- Inventariar skills globais e de projetos, eliminando duplicatas entre agentes.
+- Inspecionar `SKILL.md`, frontmatter YAML, arquivos e sinais heurísticos de risco antes de instalar.
+- Instalar várias skills de um repositório público do GitHub para um ou mais agentes.
+- Manter proveniência, commit de origem, hash SHA-256, cópia no Vault e backup local.
+- Bloquear atualizações que poderiam sobrescrever modificações locais.
+- Registrar fontes, projetos e atividades no próprio computador.
+- Trabalhar inteiramente em Português (Brasil), com atalhos de teclado e paleta de comandos.
 
-## Desenvolvimento
+## Princípios do produto
 
-Prerequisites: Node.js, pnpm, Rust stable MSVC, Visual Studio C++ Build Tools and WebView2.
+| Princípio             | Como aparece no Axis                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Local por padrão      | Banco SQLite, configurações, Vault e histórico permanecem em `LocalAppData`.                                              |
+| Inspeção sem execução | Skills e binários detectados são lidos como conteúdo; o Axis não os executa durante descoberta ou instalação.             |
+| Mudanças recuperáveis | Instalações gerenciadas têm hash, backup e troca com restauração em caso de falha.                                        |
+| Limites explícitos    | Apenas repositórios públicos do GitHub são suportados nesta versão; credenciais privadas não são pedidas nem armazenadas. |
+
+## Fluxo de segurança
+
+```mermaid
+flowchart LR
+  A[Repositório público do GitHub] --> B[Download temporário]
+  B --> C{Validações}
+  C -->|Arquivo, tamanho, paths e links| D[Inspeção da skill]
+  D --> E{Confirmação do usuário}
+  E --> F[Vault local e backup]
+  F --> G[Skill do agente]
+```
+
+O Axis aplica limites de arquivo e expansão de ZIP, rejeita caminhos inseguros e links simbólicos, não substitui diretórios não gerenciados e interrompe a operação se detectar alterações locais em uma skill gerenciada. A análise de risco é heurística: serve para orientar revisão humana, não para certificar conteúdo como seguro.
+
+## Começar a usar
+
+### Executável local
+
+Após uma build local, abra o atalho **Axis** na Área de Trabalho. Ele aponta para o executável estável em `src-tauri/target/release/axis.exe` e é renovado sempre que `pnpm release:local` é executado.
+
+### Desenvolvimento
+
+Pré-requisitos: Windows 10/11, Node.js 22+, pnpm, Rust stable com MSVC, Visual Studio Build Tools e WebView2.
 
 ```powershell
+git clone https://github.com/marquezinii/axis.git
+cd axis
 pnpm install
 pnpm tauri dev
 ```
 
-Validação e empacotamento:
+### Qualidade e distribuição
 
 ```powershell
+# Formatação e frontend
+pnpm format:check
 pnpm check
+
+# Backend Rust
 cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
 cargo test --manifest-path src-tauri/Cargo.toml
-pnpm tauri build
+
+# Executável, instaladores e atalho da Área de Trabalho
+pnpm release:local
 ```
 
-Use `pnpm release:local` para as próximas versões locais. Ele recompila o executável estável e atualiza o atalho da Área de Trabalho. O atalho aponta para `src-tauri/target/release/axis.exe`; cada build bem-sucedida atualiza o app aberto por ele.
-
-## Documentação
-
-- [Arquitetura](ARCHITECTURE.md)
-- [Contribuição](CONTRIBUTING.md)
-- [Segurança](SECURITY.md)
-- [Estado do projeto](PROJECT_STATE.md)
+Os instaladores NSIS e MSI ficam em `src-tauri/target/release/bundle/`. A build de desenvolvimento não é assinada; políticas de reputação do Windows podem exigir confirmação do usuário.
 
 ## Arquitetura
 
-The React frontend only calls narrow Tauri commands. Rust adapters own agent conventions; the skills module owns discovery, GitHub staging, validation, hashing, installation and update checks; SQLite stores sources, workspaces, operations and managed installation provenance. App data is resolved through the operating system under LocalAppData—no personal path is hardcoded.
+```text
+React + TypeScript (interface)
+        │ Tauri IPC com comandos específicos
+        ▼
+Rust (descoberta, staging, validação e instalação)
+        │
+        ├── SQLite: projetos, fontes, histórico e proveniência
+        ├── Vault: cópia imutável por commit
+        └── Backups: estado anterior à atualização
+```
 
-## Filosofia de segurança
+| Área                                | Responsabilidade                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `src/`                              | Interface React, experiência em Português (Brasil) e chamadas IPC restritas.   |
+| `src-tauri/src/agents.rs`           | Convenções de descoberta e caminhos conhecidos de cada agente.                 |
+| `src-tauri/src/skills.rs`           | GitHub público, staging, ZIP, inspeção, hash, Vault, instalação e atualização. |
+| `src-tauri/src/storage.rs`          | Persistência SQLite no diretório local do sistema operacional.                 |
+| `scripts/sync-desktop-shortcut.ps1` | Sincronização do atalho da Área de Trabalho após uma release local.            |
 
-Skills are untrusted content. Axis never runs scripts found in a skill during discovery or installation. Archives are size-limited and extracted only through enclosed relative paths; links are rejected; existing unmanaged folders are never overwritten; managed local changes block replacement. See [SECURITY.md](SECURITY.md).
+Leia [ARCHITECTURE.md](ARCHITECTURE.md) para os limites entre a interface, o backend e o sistema de arquivos.
 
-## Build
+## Privacidade e segurança
 
-`pnpm tauri build` creates signed-ready NSIS and MSI artifacts under `src-tauri/target/release/bundle`. Code signing is not configured for the development build.
+O Axis não é uma sandbox para skills depois que elas são instaladas no runtime de outro agente. Por isso, revise repositórios antes de instalá-los e trate resultados de baixo risco como um sinal, nunca como garantia.
+
+O relatório completo de controles, limites e canais de reporte está em [SECURITY.md](SECURITY.md).
+
+## Contribuição
+
+Este repositório mantém CI para frontend e Rust, Dependabot semanal e templates para issues e pull requests. Consulte [CONTRIBUTING.md](CONTRIBUTING.md) antes de enviar alterações. Para regras de convivência, veja [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+Não inclua segredos, dados pessoais, bancos SQLite locais, logs ou skills privadas em commits e issues.
+
+## Estado do projeto
+
+O estado operacional e decisões relevantes ficam em [PROJECT_STATE.md](PROJECT_STATE.md). O repositório é privado; a distribuição e a governança são mantidas pelo proprietário.
