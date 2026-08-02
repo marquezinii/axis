@@ -3,7 +3,6 @@ use directories::BaseDirs;
 use std::{
     env,
     path::{Path, PathBuf},
-    process::Command,
 };
 
 pub trait AgentAdapter {
@@ -36,12 +35,13 @@ pub trait AgentAdapter {
         } else {
             "Not installed"
         };
-        let version = executable.as_deref().and_then(read_version);
         AgentDetection {
             id: self.id().into(),
             display_name: self.display_name().into(),
             status: status.into(),
-            version,
+            // A program found through PATH is evidence of installation, not a trusted child
+            // process. Discovery must not execute it merely to display a version string.
+            version: None,
             executable: executable.map(|p| p.display().to_string()),
             config_paths: configs
                 .into_iter()
@@ -70,15 +70,6 @@ fn find_executable(names: &[&str]) -> Option<PathBuf> {
             })
         })
     })
-}
-
-fn read_version(path: &Path) -> Option<String> {
-    let output = Command::new(path).arg("--version").output().ok()?;
-    if !output.status.success() {
-        return None;
-    }
-    let text = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    (!text.is_empty()).then_some(text)
 }
 
 pub struct Codex;

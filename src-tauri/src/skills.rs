@@ -474,6 +474,20 @@ fn copy_tree(source: &Path, destination: &Path) -> Result<(), String> {
     Ok(())
 }
 
+fn replace_tree(staged: &Path, destination: &Path) -> Result<(), String> {
+    if !destination.exists() {
+        return fs::rename(staged, destination).map_err(|e| e.to_string());
+    }
+
+    let previous = destination.with_file_name(format!(".axis-previous-{}", uuid::Uuid::new_v4()));
+    fs::rename(destination, &previous).map_err(|e| e.to_string())?;
+    if let Err(error) = fs::rename(staged, destination) {
+        let _ = fs::rename(&previous, destination);
+        return Err(error.to_string());
+    }
+    fs::remove_dir_all(previous).map_err(|e| e.to_string())
+}
+
 pub fn install(request: InstallRequest) -> Result<String, String> {
     if request.skills.is_empty() || request.agents.is_empty() {
         return Err("Choose at least one skill and one agent".into());
@@ -541,10 +555,7 @@ pub fn install(request: InstallRequest) -> Result<String, String> {
             }
             let staged = root.join(format!(".axis-{}", uuid::Uuid::new_v4()));
             copy_tree(&canonical, &staged)?;
-            if destination.exists() {
-                fs::remove_dir_all(&destination).map_err(|e| e.to_string())?
-            }
-            fs::rename(&staged, &destination).map_err(|e| e.to_string())?;
+            replace_tree(&staged, &destination)?;
             storage::save_installation(
                 &name,
                 &repo_url,
