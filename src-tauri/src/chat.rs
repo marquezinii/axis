@@ -1,19 +1,19 @@
 use crate::models::{ChatMessageView, FileChangeView, SessionInfo};
 use crate::providers::{ChatProvider, ProviderError, SessionContext, StreamEvent};
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter, State};
 use uuid::Uuid;
 
 /// Tracks active streaming sessions for cancellation.
 pub struct ActiveSessions {
-    pub cancel_tokens: Mutex<HashMap<String, tokio::sync::oneshot::Sender<()>>>,
+    pub cancel_tokens: Arc<Mutex<HashMap<String, tokio::sync::oneshot::Sender<()>>>>,
 }
 
 impl ActiveSessions {
     pub fn new() -> Self {
         Self {
-            cancel_tokens: Mutex::new(HashMap::new()),
+            cancel_tokens: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }
@@ -85,13 +85,16 @@ pub async fn chat_send_message(
     let (tx, mut rx) = tokio::sync::mpsc::channel::<StreamEvent>(64);
     let (cancel_tx, cancel_rx) = tokio::sync::oneshot::channel::<()>();
 
+    let cancel_tokens = active.cancel_tokens.clone();
+
     {
-        let mut tokens = active.cancel_tokens.lock().unwrap();
+        let mut tokens = cancel_tokens.lock().unwrap();
         tokens.insert(session_id.clone(), cancel_tx);
     }
 
     let app_handle = app.clone();
     let sid = session_id.clone();
+    let cancel_tokens_fwd = cancel_tokens.clone();
 
     // Spawn the provider call
     tokio::spawn(async move {
@@ -101,6 +104,11 @@ pub async fn chat_send_message(
         };
 
         if let Err(e) = result {
+            // Cleanup the cancel token on error
+            {
+                let mut tokens = cancel_tokens.lock().unwrap();
+                tokens.remove(&session_ctx.session_id);
+            }
             let _ = tx
                 .send(StreamEvent::SessionError {
                     code: format!("{:?}", e),
@@ -173,8 +181,11 @@ pub async fn chat_send_message(
             }
         }
 
-        // Cleanup cancel token
-        // (The Mutex guard is dropped after the spawn)
+        // Cleanup cancel token after streaming completes
+        {
+            let mut tokens = cancel_tokens_fwd.lock().unwrap();
+            tokens.remove(&sid_for_events);
+        }
     });
 
     // Cleanup after streaming finishes (handled by the spawned task above)
