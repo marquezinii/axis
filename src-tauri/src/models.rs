@@ -106,3 +106,37 @@ pub struct InstallRequest {
     pub skills: Vec<String>,
     pub agents: Vec<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionInfo {
+    pub id: String,
+    pub workspace_id: i64,
+    pub provider: String,
+    pub title: Option<String>,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatMessageView {
+    pub id: String,
+    pub session_id: String,
+    pub role: String,
+    pub content: String,
+    pub tool_calls: Option<String>,
+    pub token_usage: Option<String>,
+    pub created_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FileChangeView {
+    pub id: String,
+    pub session_id: String,
+    pub message_id: Option<String>,
+    pub file_path: String,
+    pub diff: Option<String>,
+    pub change_type: String,
+}
