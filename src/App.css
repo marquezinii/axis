@@ -1642,6 +1642,73 @@ aside {
   white-space: pre-wrap;
 }
 
+.provider-selector {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: #313244;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+.provider-tab {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #a6adc8;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.provider-tab.active {
+  background: #89b4fa;
+  color: #11111b;
+}
+.workspace-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.workspace-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  gap: 1rem;
+}
+.recent-sessions {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 1.5rem;
+}
+.recent-sessions h3 {
+  font-size: 0.85rem;
+  color: #a6adc8;
+  margin-bottom: 0.5rem;
+}
+.session-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: #313244;
+  border: none;
+  border-radius: 6px;
+  color: #cdd6f4;
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+}
+.session-row:hover {
+  background: #45475a;
+}
+.session-row small {
+  color: #a6adc8;
+  font-size: 0.75rem;
+}
+
 .topbar {
   height: 82px;
   background: rgba(8, 16, 29, 0.76);
