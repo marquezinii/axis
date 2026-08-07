@@ -28,7 +28,8 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import './App.css';
+import { WorkspacePanel } from './components/workspace/WorkspacePanel';
+import { SessionList } from './components/workspace/SessionList';
 
 type Agent = {
   id: string;
@@ -88,7 +89,7 @@ type Update = {
   availableCommit?: string;
   status: string;
 };
-type View = 'home' | 'agents' | 'skills' | 'sources' | 'workspaces' | 'activity' | 'settings';
+type View = 'home' | 'agents' | 'skills' | 'sources' | 'workspaces' | 'activity' | 'settings' | 'workspace' | 'history';
 
 const empty: Dashboard = {
   agents: [],
@@ -106,6 +107,8 @@ const nav = [
   ['sources', Database, 'Fontes'],
   ['workspaces', Folder, 'Projetos'],
   ['activity', Activity, 'Atividade'],
+  ['workspace', Bot, 'Workspace'],
+  ['history', Activity, 'History'],
 ] as const;
 
 const portuguese: Record<string, string> = {
@@ -388,6 +391,7 @@ function App() {
   const [updates, setUpdates] = useState<Update[]>([]);
   const [filter, setFilter] = useState('Todos');
   const [query, setQuery] = useState('');
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const notify = useCallback((message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(''), 2800);
@@ -491,6 +495,24 @@ function App() {
   };
   const removeSource = async (id: number) =>
     setData(await invoke<Dashboard>('remove_source', { id }));
+
+  const batchInstall = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const requests = selectedSkills.map((id) => {
+        const skill = dashboard.skills.find((s) => s.id === id);
+        return { url: skill?.source || '', skills: [skill?.name || ''], agents: ['codex', 'claude', 'opencode'] };
+      });
+      await invoke<Dashboard>('batch_install_github', { requests });
+      setSelectedSkills([]);
+      notify('Batch install completed');
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const content = () => {
     if (loading)
@@ -850,26 +872,47 @@ function App() {
             </div>
           </div>
           {visibleSkills.length ? (
-            <div className="skill-list">
-              {visibleSkills.map((s) => (
-                <button key={s.id} onClick={() => setSkill(s)}>
-                  <span className="skill-logo">
-                    <FileCode2 />
-                  </span>
-                  <span className="skill-copy">
-                    <strong>{s.name}</strong>
-                    <small>{s.description}</small>
-                    <em>{s.agents.join(' · ') || 'Nenhum agente'}</em>
-                  </span>
-                  <Badge tone={s.managed ? 'good' : 'neutral'}>
-                    {s.managed ? 'Gerenciada' : 'Unmanaged'}
-                  </Badge>
-                  {s.modified && <Badge tone="warn">Modificada</Badge>}
-                  <Badge tone={statusTone(s.risk)}>{s.risk}</Badge>
-                  <ChevronRight />
-                </button>
-              ))}
-            </div>
+            <>
+              {selectedSkills.length > 0 && (
+                <div className="batch-actions">
+                  <span>{selectedSkills.length} selected</span>
+                  <Button kind="primary" onClick={batchInstall}>Install to all agents</Button>
+                </div>
+              )}
+              <div className="skill-list">
+                {visibleSkills.map((s) => (
+                  <button key={s.id} onClick={() => setSkill(s)}>
+                    <input
+                      type="checkbox"
+                      className="skill-checkbox"
+                      checked={selectedSkills.includes(s.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        if (e.target.checked) {
+                          setSelectedSkills((v) => [...v, s.id]);
+                        } else {
+                          setSelectedSkills((v) => v.filter((x) => x !== s.id));
+                        }
+                      }}
+                    />
+                    <span className="skill-logo">
+                      <FileCode2 />
+                    </span>
+                    <span className="skill-copy">
+                      <strong>{s.name}</strong>
+                      <small>{s.description}</small>
+                      <em>{s.agents.join(' · ') || 'Nenhum agente'}</em>
+                    </span>
+                    <Badge tone={s.managed ? 'good' : 'neutral'}>
+                      {s.managed ? 'Gerenciada' : 'Unmanaged'}
+                    </Badge>
+                    {s.modified && <Badge tone="warn">Modificada</Badge>}
+                    <Badge tone={statusTone(s.risk)}>{s.risk}</Badge>
+                    <ChevronRight />
+                  </button>
+                ))}
+              </div>
+            </>
           ) : (
             <EmptyState
               icon={FileCode2}
@@ -1012,6 +1055,52 @@ function App() {
               />
             )}
           </section>
+        </>
+      );
+    if (view === 'workspace')
+      return (
+        <>
+          {dashboard.workspaces.length === 0 ? (
+            <EmptyState
+              icon={Folder}
+              title="Add a project first"
+              body="Add a workspace folder to start chatting with AI."
+              action={
+                <Button kind="primary" onClick={addWorkspace}>
+                  <FolderOpen size={16} /> Add project
+                </Button>
+              }
+            />
+          ) : (
+            <div className="panel-fill"><WorkspacePanel workspaceId={dashboard.workspaces[0].id} /></div>
+          )}
+        </>
+      );
+    if (view === 'history')
+      return (
+        <>
+          {dashboard.workspaces.length === 0 ? (
+            <EmptyState
+              icon={Folder}
+              title="Add a project first"
+              body="Add a workspace to see session history."
+              action={
+                <Button kind="primary" onClick={addWorkspace}>
+                  <FolderOpen size={16} /> Add project
+                </Button>
+              }
+            />
+          ) : (
+            <div className="panel-fill">
+              <SectionTitle title="Session History" body="Past chat sessions in this workspace." />
+              <SessionList
+                workspaceId={dashboard.workspaces[0].id}
+                onSelectSession={(_id) => {
+                  setView('workspace');
+                }}
+              />
+            </div>
+          )}
         </>
       );
     return (
