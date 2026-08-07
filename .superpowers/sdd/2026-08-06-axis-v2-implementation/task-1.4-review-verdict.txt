@@ -1,0 +1,82 @@
+================================================================================
+TASK 1.4 REVIEW VERDICT
+Axis v2 — Unified AI Workspace Implementation
+Date: 2026-08-06
+Reviewed commit: 4eae87a (92a1c52..HEAD)
+================================================================================
+
+SPEC
+----
+Task 1.4 (plan docs/superpowers/plans/2026-08-06-axis-v2-implementation.md,
+"### Task 1.4:" through "### Task 1.5:"):
+- Create src-tauri/src/providers/claude.rs: ClaudeProvider struct implementing
+  ChatProvider via Anthropic HTTP Messages API with SSE streaming.
+- Add `pub mod claude;` to providers/mod.rs and remove the `#[cfg(feature = "claude")]`
+  gate from provider_registry().
+- Requires: 401→AuthExpired, 429→RateLimited, 529→ProviderUnavailable; API key from
+  ANTHROPIC_API_KEY; model claude-sonnet-4-20250514; no silent retries.
+
+TASK
+----
+- Check ClaudeProvider implements ChatProvider trait correctly?  YES
+  - `#[async_trait::async_trait] impl ChatProvider for ClaudeProvider` with
+    `id() -> "claude"`, `display_name() -> "Claude"`, and `send_message(&self, ...)`
+    matching the trait signature exactly (session, message, history, tools, tx).
+    Matches plan code verbatim.
+- Check HTTP client uses rustls-tls (already in reqwest features)?  YES
+  - Verified at HEAD: `reqwest = { version = "0.12", default-features = false,
+    features = ["blocking", "json", "rustls-tls", "stream"] }`. Code uses
+    `reqwest::Client::new()` with no native-tls override. No Cargo.toml change
+    required for this task.
+- Check SSE parsing handles all required events?  YES
+  - `message_start` → input_tokens (from event.message.usage)
+  - `content_block_delta` → TextDelta (event.delta.text)
+  - `message_delta` → output_tokens (event.usage.output_tokens)
+  - `message_stop` → SessionCompleted(input_tokens, output_tokens)
+  - `error` → SessionError
+  - Chunk buffering (buffer.find("\n\n")) correctly handles events split across
+    HTTP chunk boundaries. Unhandled types fall through `_ => {}`.
+- Check error mapping correct (401/429/529)?  YES
+  - 401 → AuthExpired, 429 → RateLimited, 529 → ProviderUnavailable,
+    else Unknown("HTTP {status}: {body}"). Transport errors: timeout →
+    ProviderUnavailable, other → Unknown. No silent retries.
+- Check API key from ANTHROPIC_API_KEY env var?  YES
+  - `std::env::var("ANTHROPIC_API_KEY")`, missing key mapped to AuthExpired.
+- Check model string correct?  YES
+  - `"claude-sonnet-4-20250514"` — matches plan verbatim. `max_tokens: 4096`,
+    `stream: true`, tools array added only when non-empty.
+- Check provider registry updated (cfg gate removed)?  YES
+  - `pub mod claude;` added; `#[cfg(feature = "claude")]` removed;
+    provider_registry() now unconditionally returns ClaudeProvider. Verified at HEAD.
+
+ISSUES
+------
+No findings.
+
+The implementation matches the plan code verbatim (diff is 100% spec-faithful) and
+passes `cargo check`. No regressions introduced by the change; no discrete,
+actionable defects introduced by this commit.
+
+Observations (plan-level gaps / residual risks, NOT findings — all present in the
+plan's own code, deferred by design):
+- [P3-ish, deferred] Tool-use streaming events are not parsed: `content_block_start`
+  (tool_use) and `content_block_delta` (input_json_delta) fall through `_ => {}`, so
+  ToolCallStarted / ToolCallFinished / FileChanged StreamEvents are never emitted by
+  ClaudeProvider. Consistent with plan; likely a later-task concern.
+- [Low risk] SSE split uses LF-only `\n\n`; `\r\n` line endings would not be split.
+  Anthropic emits LF, so acceptable.
+- [Style] `build_body` `session` parameter unused (plan-verbatim; compiler warning only).
+- [Test gap] No unit/integration tests for the provider (network-bound); only
+  `cargo check` verification. Providers module not yet wired into lib.rs — that is
+  Task 1.5.
+- [Nit] Both changed files lack trailing newline.
+
+VERDICT
+-------
+PASS — Task 1.4 is correctly implemented and matches the plan specification.
+All 7 checklist items verified. Commit 4eae87a may proceed; Task 1.5 (chat.rs +
+lib.rs wiring) is the natural next step and will make the provider reachable.
+
+================================================================================
+END OF VERDICT
+================================================================================

@@ -1,0 +1,42 @@
+================================================================================
+TASK 1.5 RE-REVIEW VERDICT (fix round 1)
+Axis v2 — Unified AI Workspace Implementation
+Date: 2026-08-06
+Reviewed: commit 894afdb (9c07435..HEAD), fix for P2 from initial review
+================================================================================
+
+P2 FINDING ADDRESSED
+--------------------
+Initial review flagged: cancel tokens were inserted into ActiveSessions.cancel_tokens
+but never removed when streaming completed or errored (leak).
+
+FIX VERIFICATION (diff 9c07435..HEAD, src-tauri/src/chat.rs)
+--------------------------------------------------------------
+1. ActiveSessions.cancel_tokens is now Arc<Mutex<HashMap<String, oneshot::Sender<()>>>>
+   so the Arc can be cloned into the spawned provider task. ActiveSessions::new()
+   updated to Arc::new(Mutex::new(HashMap::new())).
+2. chat_send_message: clones the Arc (cancel_tokens) for the provider spawn and a
+   second clone (cancel_tokens_fwd) for the forwarding loop task.
+3. Error path: inside the provider tokio::spawn, on Err(result) the token is removed
+   via tokens.remove(&session_ctx.session_id) BEFORE SessionError is sent.
+4. Completion path: after the forwarding loop ends, the token is removed via
+   cancel_tokens_fwd.remove(&sid_for_events).
+5. Both paths use idempotent HashMap::remove; no panics introduced; Mutex guards
+   scoped in blocks.
+
+CHECKS
+------
+- P2 (cancel token cleanup on error and completion)?  YES
+- Compiles?  YES (cargo check, only pre-existing warnings)
+- Tests pass?  YES (cargo test --manifest-path src-tauri/Cargo.toml — all suites pass,
+  incl. chat_lifecycle + chat_persistence)
+- No new regressions introduced?  YES (scope strictly limited to chat.rs)
+
+VERDICT
+-------
+APPROVED — fix round 1 is correct and complete. Task 1.5 is complete.
+Phase 2 (Chat UI) may proceed from BASE 894afdb.
+
+================================================================================
+END OF VERDICT
+================================================================================
