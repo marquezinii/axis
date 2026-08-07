@@ -99,7 +99,7 @@ pub struct UpdateStatus {
     pub status: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct InstallRequest {
     pub url: String,

@@ -76,6 +76,16 @@ fn install_github(request: InstallRequest) -> Result<Dashboard, String> {
     skills::install(request)?;
     snapshot()
 }
+
+#[tauri::command]
+fn batch_install_github(requests: Vec<InstallRequest>) -> Result<Dashboard, String> {
+    for req in &requests {
+        skills::install(req.clone())?;
+    }
+    storage::activity("batch_install", &format!("Batch installed {} skills", requests.len()))?;
+    snapshot()
+}
+
 #[tauri::command]
 fn check_updates() -> Result<Vec<UpdateStatus>, String> {
     skills::check_updates()
@@ -135,6 +145,7 @@ pub fn run() {
             remove_source,
             inspect_github,
             install_github,
+            batch_install_github,
             check_updates,
             open_managed_folder,
             chat::chat_create_session,
