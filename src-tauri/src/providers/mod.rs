@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+pub mod claude;
+
 /// Closed set of provider errors per the v2 spec.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -66,8 +68,5 @@ pub trait ChatProvider: Send + Sync {
 
 /// Registry of available chat providers.
 pub fn provider_registry() -> Vec<Box<dyn ChatProvider>> {
-    vec![
-        #[cfg(feature = "claude")]
-        Box::new(crate::providers::claude::ClaudeProvider::new()),
-    ]
+    vec![Box::new(crate::providers::claude::ClaudeProvider::new())]
 }
