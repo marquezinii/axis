@@ -1,0 +1,6 @@
+// apps/backend/src/auth/session-token.ts
+import { randomBytes } from "node:crypto";
+
+export function generateSessionToken(): string {
+  return randomBytes(32).toString("hex");
+}

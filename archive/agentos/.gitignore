@@ -1,0 +1,14 @@
+.worktrees/
+node_modules/
+dist/
+build/
+*.log
+.env
+.env.local
+*.db
+*.db-shm
+*.db-wal
+release/
+.DS_Store
+test-results/
+playwright-report/

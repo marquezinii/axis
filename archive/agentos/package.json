@@ -1,0 +1,23 @@
+{
+  "name": "agentos",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=packages/shared && npm run build --workspace=apps/backend && npm run build --workspace=apps/desktop && npm run dist --workspace=apps/desktop",
+    "postbuild": "powershell -ExecutionPolicy Bypass -File ./scripts/update-desktop-shortcut.ps1",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "allowScripts": {
+    "electron@43.2.0": true,
+    "esbuild@0.21.5": true,
+    "esbuild@0.28.1": true,
+    "electron-winstaller@5.4.0": true
+  }
+}
