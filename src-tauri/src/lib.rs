@@ -1,5 +1,7 @@
 mod agents;
+mod chat;
 mod models;
+mod providers;
 mod skills;
 pub mod storage;
 
@@ -121,6 +123,7 @@ fn open_managed_folder(path: String) -> Result<(), String> {
 pub fn run() {
     storage::connect().expect("failed to initialize Axis storage");
     tauri::Builder::default()
+        .manage(chat::ActiveSessions::new())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             get_dashboard,
@@ -133,7 +136,14 @@ pub fn run() {
             inspect_github,
             install_github,
             check_updates,
-            open_managed_folder
+            open_managed_folder,
+            chat::chat_create_session,
+            chat::chat_send_message,
+            chat::chat_cancel,
+            chat::chat_get_sessions,
+            chat::chat_get_messages,
+            chat::chat_get_file_changes,
+            chat::chat_delete_session,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Axis");
