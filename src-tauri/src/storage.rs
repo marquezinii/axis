@@ -26,6 +26,31 @@ pub fn connect() -> Result<Connection, String> {
           destination TEXT NOT NULL UNIQUE, installed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS chat_sessions (
+            id TEXT PRIMARY KEY,
+            workspace_id INTEGER NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+            provider TEXT NOT NULL,
+            title TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id TEXT PRIMARY KEY,
+            session_id TEXT NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            tool_calls TEXT,
+            token_usage TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE TABLE IF NOT EXISTS file_changes (
+            id TEXT PRIMARY KEY,
+            session_id TEXT NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
+            message_id TEXT REFERENCES chat_messages(id),
+            file_path TEXT NOT NULL,
+            diff TEXT,
+            change_type TEXT NOT NULL
+        );
     ").map_err(|e| e.to_string())?;
     Ok(db)
 }
@@ -184,4 +209,118 @@ pub fn installations() -> Result<Vec<(String, String, String, String)>, String> 
         .map_err(|e| e.to_string())?
         .collect::<Result<Vec<_>, _>>()
         .map_err(|e| e.to_string())
+}
+
+pub fn save_session(id: &str, workspace_id: i64, provider: &str) -> Result<(), String> {
+    connect()?
+        .execute(
+            "INSERT INTO chat_sessions(id, workspace_id, provider) VALUES(?1, ?2, ?3)",
+            rusqlite::params![id, workspace_id, provider],
+        )
+        .map_err(|e| e.to_string())?;
+    activity("chat_session", &format!("Started {} session in workspace {}", provider, workspace_id))
+}
+
+pub fn update_session_title(id: &str, title: &str) -> Result<(), String> {
+    connect()?
+        .execute(
+            "UPDATE chat_sessions SET title=?1, updated_at=datetime('now') WHERE id=?2",
+            rusqlite::params![title, id],
+        )
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+pub fn save_message(
+    id: &str, session_id: &str, role: &str, content: &str,
+    tool_calls: Option<&str>, token_usage: Option<&str>,
+) -> Result<(), String> {
+    connect()?
+        .execute(
+            "INSERT INTO chat_messages(id, session_id, role, content, tool_calls, token_usage) VALUES(?1,?2,?3,?4,?5,?6)",
+            rusqlite::params![id, session_id, role, content, tool_calls, token_usage],
+        )
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+pub fn save_file_change(
+    id: &str, session_id: &str, message_id: Option<&str>,
+    file_path: &str, diff: Option<&str>, change_type: &str,
+) -> Result<(), String> {
+    connect()?
+        .execute(
+            "INSERT INTO file_changes(id, session_id, message_id, file_path, diff, change_type) VALUES(?1,?2,?3,?4,?5,?6)",
+            rusqlite::params![id, session_id, message_id, file_path, diff, change_type],
+        )
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+pub fn get_sessions(workspace_id: i64) -> Result<Vec<crate::models::SessionInfo>, String> {
+    let db = connect()?;
+    let mut stmt = db
+        .prepare("SELECT id, workspace_id, provider, title, created_at, updated_at FROM chat_sessions WHERE workspace_id=?1 ORDER BY updated_at DESC")
+        .map_err(|e| e.to_string())?;
+    stmt.query_map(rusqlite::params![workspace_id], |r| {
+        Ok(crate::models::SessionInfo {
+            id: r.get(0)?,
+            workspace_id: r.get(1)?,
+            provider: r.get(2)?,
+            title: r.get(3)?,
+            created_at: r.get(4)?,
+            updated_at: r.get(5)?,
+        })
+    })
+    .map_err(|e| e.to_string())?
+    .collect::<Result<Vec<_>, _>>()
+    .map_err(|e| e.to_string())
+}
+
+pub fn get_messages(session_id: &str) -> Result<Vec<crate::models::ChatMessageView>, String> {
+    let db = connect()?;
+    let mut stmt = db
+        .prepare("SELECT id, session_id, role, content, tool_calls, token_usage, created_at FROM chat_messages WHERE session_id=?1 ORDER BY created_at ASC")
+        .map_err(|e| e.to_string())?;
+    stmt.query_map(rusqlite::params![session_id], |r| {
+        Ok(crate::models::ChatMessageView {
+            id: r.get(0)?,
+            session_id: r.get(1)?,
+            role: r.get(2)?,
+            content: r.get(3)?,
+            tool_calls: r.get(4)?,
+            token_usage: r.get(5)?,
+            created_at: r.get(6)?,
+        })
+    })
+    .map_err(|e| e.to_string())?
+    .collect::<Result<Vec<_>, _>>()
+    .map_err(|e| e.to_string())
+}
+
+pub fn get_file_changes(session_id: &str) -> Result<Vec<crate::models::FileChangeView>, String> {
+    let db = connect()?;
+    let mut stmt = db
+        .prepare("SELECT id, session_id, message_id, file_path, diff, change_type FROM file_changes WHERE session_id=?1 ORDER BY rowid ASC")
+        .map_err(|e| e.to_string())?;
+    stmt.query_map(rusqlite::params![session_id], |r| {
+        Ok(crate::models::FileChangeView {
+            id: r.get(0)?,
+            session_id: r.get(1)?,
+            message_id: r.get(2)?,
+            file_path: r.get(3)?,
+            diff: r.get(4)?,
+            change_type: r.get(5)?,
+        })
+    })
+    .map_err(|e| e.to_string())?
+    .collect::<Result<Vec<_>, _>>()
+    .map_err(|e| e.to_string())
+}
+
+pub fn delete_chat_session(id: &str) -> Result<(), String> {
+    connect()?
+        .execute("DELETE FROM chat_sessions WHERE id=?1", rusqlite::params![id])
+        .map_err(|e| e.to_string())?;
+    activity("chat_session", "Deleted chat session")
 }

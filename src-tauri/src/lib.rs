@@ -1,7 +1,7 @@
 mod agents;
 mod models;
 mod skills;
-mod storage;
+pub mod storage;
 
 use directories::BaseDirs;
 use models::{Dashboard, GithubInspection, InstallRequest, UpdateStatus};
