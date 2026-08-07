@@ -29,9 +29,13 @@ sha2 = "0.11"
 hex = "0.4"
 rusqlite = { version = "0.40", features = ["bundled"] }
 thiserror = "2"
-reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls", "stream"] }
 zip = { version = "8", default-features = false, features = ["deflate"] }
 tempfile = "3"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["v4"] }
 rfd = "0.17"
+tokio = { version = "1", features = ["full"] }
+eventsource-stream = "0.2"
+async-trait = "0.1"
+futures-util = "0.3"
