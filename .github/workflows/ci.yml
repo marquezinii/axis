@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev/proxima-versao]
   pull_request:
-    branches: [main]
+    branches: [main, dev/proxima-versao]
 
 permissions:
   contents: read

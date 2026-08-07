@@ -36,11 +36,12 @@ local).
 
 - Versão declarada em `package.json`, `src-tauri/Cargo.toml` e
   `src-tauri/tauri.conf.json`: **0.2.0**.
-- Única branch: `main` (também a branch de integração — ver
-  [`AI_RULES.md`](AI_RULES.md)). Sem tags Git, sem GitHub Releases.
-- CI (`.github/workflows/ci.yml`) roda em push/PR para `main`: frontend
-  (`pnpm format:check`, `pnpm check`) e Rust (`cargo fmt --check`, `cargo
-clippy -D warnings`, `cargo test`).
+- Branches: `main` (pública/estável) e `dev/proxima-versao` (integração
+  oficial da próxima versão — ver [`AI_RULES.md`](AI_RULES.md)). Sem tags
+  Git, sem GitHub Releases.
+- CI (`.github/workflows/ci.yml`) roda em push/PR para `main` e
+  `dev/proxima-versao`: frontend (`pnpm format:check`, `pnpm check`) e Rust
+  (`cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`).
 - Distribuição: build local via `pnpm release:local` (`tauri build` +
   `scripts/sync-desktop-shortcut.ps1`, que atualiza o atalho **Axis** na Área
   de Trabalho). Sem instalador público, sem updater, sem assinatura de
@@ -292,6 +293,6 @@ src-tauri/Cargo.toml` → **8 passed, 0 failed** (4 lib: `agents.rs` +
   reexecutados nesta sessão (mudança foi exclusivamente documental, sem
   tocar `src/` ou `src-tauri/src/`); a última execução conhecida com sucesso
   é a da integração `e96c15e` (ver dossiê do projeto).
-- Estado para a próxima IA: repositório limpo em `main` além desta mudança
-  de governança; sem branches `ai/*` abertas; sem worktrees além do
+- Estado para a próxima IA: `main` e `dev/proxima-versao` sincronizadas nesta
+  mudança de governança; sem branches `ai/*` abertas; sem worktrees além do
   principal; sem tarefas pendentes em `.ai/tasks/`.

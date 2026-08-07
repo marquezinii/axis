@@ -23,26 +23,23 @@ Ao iniciar qualquer tarefa, leia integralmente, nesta ordem:
 
 ## Branches e isolamento
 
-Este repositório hoje possui **apenas `main`** (branch pública, protegida por
-CI) — não existe branch de integração como `dev`/`develop`/`next`. Adote o
-modelo abaixo sem inventar uma segunda branch pública concorrente:
-
-- `main` é a branch pública/estável e a **branch de integração** ao mesmo
-  tempo. `origin/main` é protegida por CI (`.github/workflows/ci.yml`):
-  `pnpm format:check`, `pnpm check`, `cargo fmt --check`, `cargo clippy -D
-warnings`, `cargo test`.
+- `main` contém exclusivamente o estado público/estável já publicado (é
+  também a branch protegida por CI, `.github/workflows/ci.yml`) e só é
+  alterada durante uma **publicação oficial** (ver seção Publicação).
+- `dev/proxima-versao` é a branch oficial de **integração** da próxima
+  versão. Agentes de tarefas normais não desenvolvem diretamente nela.
 - `ai/<agente>/<tarefa>` é uma branch temporária e exclusiva de uma tarefa,
-  criada a partir de `main`. Formato: `ai/claude/chat-provider-codex` ou
-  `ai/codex/fix-vault-hash`. Use a identidade conhecida do agente; se não
-  puder ser determinada, use `ai/agent/<tarefa>`. Gere um slug curto; se já
-  existir, gere uma variante única sem perguntar.
+  criada a partir de `dev/proxima-versao`. Formato: `ai/claude/chat-provider-
+codex` ou `ai/codex/fix-vault-hash`. Use a identidade conhecida do agente; se
+  não puder ser determinada, use `ai/agent/<tarefa>`. Gere um slug curto; se
+  já existir, gere uma variante única sem perguntar.
 
 Para cada nova tarefa normal:
 
 1. identifique a raiz do repositório e leia `AI_RULES.md` e `PROJECT_STATE.md`;
 2. verifique `git status`, histórico recente, branches e worktrees;
-3. use `main` (atualizada com `origin/main`) como base, criando a branch
-   exclusiva `ai/*`;
+3. use `dev/proxima-versao` (atualizada com `origin/dev/proxima-versao`) como
+   base, criando a branch exclusiva `ai/*`;
 4. crie um Git worktree exclusivo em um diretório irmão do repositório
    principal (`git worktree add ../axis-<slug> ai/<agente>/<tarefa>`);
 5. faça alterações, testes e commits somente nesse worktree, sem trocar a
@@ -118,7 +115,7 @@ Uma tarefa concluída termina automaticamente, sem pedido adicional do usuário:
 
 Commits locais são obrigatórios e não exigem autorização remota. Não crie
 commits para experimentos ou trabalho incompleto. Não faça merge automático em
-`main` ao concluir uma tarefa isolada.
+`dev/proxima-versao` ao concluir uma tarefa isolada.
 
 ### Padrão de mensagens de commit
 
@@ -133,23 +130,22 @@ imperativo`, por exemplo `feat(providers): adiciona suporte a Codex` ou
   `package.json`, `src-tauri/Cargo.toml` e `src-tauri/tauri.conf.json` só muda
   durante uma publicação explicitamente solicitada.
 - Sem menção a nomes de agente de IA, prompt ou ferramenta interna no commit.
-- Não reescreva commits já publicados em `origin/main`.
+- Não reescreva commits já publicados em `origin/main` ou
+  `origin/dev/proxima-versao`.
 
 ## Integração das tarefas
 
 Frases como "integrar trabalhos", "integrar as IAs", "integrar branches",
-"integrar tarefas concluídas" ativam o **modo integrador**. Como `main` é a
-própria branch de integração deste projeto, integrar significa preparar e
-então trazer o trabalho para `main` (push só ocorre com autorização — ver
-Operações remotas). Nesse modo:
+"integrar tarefas concluídas" ou "preparar a dev com os trabalhos concluídos"
+ativam o **modo integrador**. Nesse modo, o agente deve:
 
 1. ler `AI_RULES.md` e `PROJECT_STATE.md`;
-2. inspecionar `main` (local e `origin/main`), branches `ai/*` e worktrees
-   existentes;
+2. inspecionar `dev/proxima-versao` (local e `origin/dev/proxima-versao`),
+   branches `ai/*` e worktrees existentes;
 3. ler os relatórios em `.ai/tasks/`;
 4. determinar quais tarefas estão efetivamente concluídas e prontas;
 5. determinar ordem segura quando houver dependências entre tarefas;
-6. integrar uma branch por vez em `main`, analisando conflitos
+6. integrar uma branch por vez em `dev/proxima-versao`, analisando conflitos
    semanticamente e preservando mudanças válidas dos dois lados;
 7. após integrações relevantes, rodar as validações de `CONTRIBUTING.md`
    (`pnpm format:check`, `pnpm check`, `cargo fmt --check`, `cargo clippy -D
@@ -157,6 +153,10 @@ warnings`, `cargo test`) e corrigir incompatibilidades;
 8. atualizar `PROJECT_STATE.md` com o estado oficial já integrado;
 9. marcar no relatório de cada tarefa integrada que ela foi incorporada;
 10. criar o(s) commit(s) de integração necessários.
+
+Quando o usuário pedir para integrar em `origin/dev/proxima-versao` (ou
+expressão equivalente), isso também autoriza explicitamente enviar somente
+`dev/proxima-versao` ao remoto após os testes, sem afetar `main`.
 
 Se duas tarefas conflitarem conceitualmente, analise os dois objetivos e
 preserve ambos sempre que for seguro e coerente.
@@ -187,15 +187,30 @@ desde que:
 - em caso de falha (conflito, rejeição, erro de rede), informe o usuário e não
   force o push.
 
+### Push de desenvolvimento
+
+Disparado por "push de desenvolvimento" ou equivalente inequívoco, ou
+automaticamente ao concluir uma tarefa na branch exclusiva (ver acima).
+
+- Se o agente estiver em `ai/*`, envie somente essa branch.
+- Se estiver no modo integrador em `dev/proxima-versao`, envie somente
+  `dev/proxima-versao`.
+- Nunca envie ou altere `main`, crie Pull Request, tag ou release nesse fluxo.
+- Nunca altere versão ou artefatos de distribuição nesse fluxo.
+- Preserve integralmente o histórico: sem squash, sem reescrever commits, sem
+  descartar trabalho já commitado sem pedido explícito e inequívoco.
+
+Esse push serve para backup remoto, sincronização entre agentes e
+continuidade do desenvolvimento; nunca é publicação.
+
 ### Push para `main`
 
-Só ocorre quando o usuário autorizar explicitamente ("integre e envie para o
-remoto", "faça push de main", ou equivalente inequívoco). Como `main` é
-protegida por CI e é a branch pública, um push nela é visível a todos —
-sempre rode as validações completas antes.
+Só ocorre durante uma **publicação oficial** explicitamente solicitada (ver
+seção abaixo). Como `main` é protegida por CI e é a branch pública, sempre
+rode as validações completas antes.
 
-Nunca use force push em `main`. Nunca crie tags ou GitHub Releases sem pedido
-explícito (ver Publicação).
+Nunca use force push em `main` ou `dev/proxima-versao`. Nunca crie tags ou
+GitHub Releases sem pedido explícito.
 
 ## Publicação / distribuição
 
@@ -205,29 +220,32 @@ Não existem tags Git no repositório. A distribuição atual é local:
 `scripts/sync-desktop-shortcut.ps1`, que atualiza o atalho **Axis** na Área de
 Trabalho do usuário para apontar ao executável recém-buildado em
 `src-tauri/target/release/`. Não há updater, não há assinatura de código, não
-há instalador público, não há site.
+há instalador público, não há site, não há GitHub Releases.
 
-Portanto, ao ser explicitamente solicitado a "publicar", "gerar build local"
-ou "atualizar o atalho":
+Ela é disparada somente por frase como "publicar versão", "lançar versão" ou
+"publicar atualização", e sempre parte do estado já integrado e consistente
+de `dev/proxima-versao`; branches `ai/*` nunca são publicadas diretamente e
+tarefas incompletas não entram na publicação. Ao ser disparada:
 
-1. garanta que o estado a publicar está em `main` (ou na branch que o usuário
-   indicou explicitamente), íntegro e com as validações de `CONTRIBUTING.md`
-   passando;
-2. rode `pnpm release:local` (ou oriente o usuário a rodar, se o ambiente de
-   execução não permitir builds Tauri completos — build Rust release pode
-   levar dezenas de segundos e exigir toolchain Windows completa);
-3. não invente checagens de updater, assinatura ou release pública — elas não
-   existem neste projeto;
-4. não crie infraestrutura de release (workflow de release, tags, GitHub
-   Releases) a menos que explicitamente solicitado como uma nova decisão de
-   produto — isso é uma mudança arquitetural, não uma tarefa de rotina.
+1. revisar `dev/proxima-versao`, validar build e testes completos
+   (`CONTRIBUTING.md`) e corrigir falhas antes de prosseguir;
+2. se o usuário pedir versionamento, sincronizar `package.json`,
+   `src-tauri/Cargo.toml` e `src-tauri/tauri.conf.json` na mesma versão
+   SemVer (`MAJOR.MINOR.PATCH`), refletindo o conjunto real de mudanças desde
+   a última versão registrada — nunca incremente versão fora deste fluxo;
+3. fazer merge de `dev/proxima-versao` para `main`, salvo se ambas já forem
+   idênticas;
+4. publicar `main`;
+5. rodar `pnpm release:local` (ou orientar o usuário a rodar, se o ambiente
+   não permitir build Tauri completo) para atualizar o executável e o atalho
+   local;
+6. sincronizar `dev/proxima-versao` com a `main` publicada para iniciar o
+   próximo ciclo.
 
-Se o usuário pedir para versionar (`package.json`, `Cargo.toml`,
-`tauri.conf.json`), trate como decisão explícita: os três arquivos devem ficar
-sincronizados na mesma versão SemVer (`MAJOR.MINOR.PATCH`), e a mudança de
-versão deve refletir o conjunto real de mudanças desde a última versão
-registrada — não incremente versão dentro de uma tarefa comum sem pedido
-explícito.
+Não invente checagens de updater, assinatura ou release pública — elas não
+existem neste projeto. Não crie essa infraestrutura (workflow de release,
+tags, GitHub Releases) a menos que explicitamente solicitado como nova
+decisão de produto — isso é mudança arquitetural, não tarefa de rotina.
 
 ## Validações
 
@@ -263,14 +281,17 @@ clippy -D warnings` e `cargo test` no mínimo.
 
 ```text
 main
-→ versão pública, protegida por CI, e branch de integração deste projeto
+→ versão pública, protegida por CI
+
+dev/proxima-versao
+→ integração oficial da próxima versão
 
 ai/<agente>/<tarefa>
 → trabalho isolado de uma tarefa
 
 Nova tarefa
 → leitura de AI_RULES.md + PROJECT_STATE.md
-→ branch ai/* criada a partir de main
+→ branch ai/* criada a partir de dev/proxima-versao
 → worktree exclusivo criado ou reutilizado
 → implementação e validações da área tocada
 → relatório .ai/tasks/<tarefa>.md
@@ -279,14 +300,18 @@ Nova tarefa
 → pronta para integração
 
 Integração solicitada
-→ integrar branches ai/* concluídas em main
+→ integrar branches ai/* concluídas em dev/proxima-versao
 → resolver conflitos semanticamente
 → validações completas (CONTRIBUTING.md)
 → atualizar PROJECT_STATE.md
 → commit(s) de integração
+→ push de dev/proxima-versao se solicitado
 
-Publicação/distribuição solicitada explicitamente
-→ validações completas em main
+Publicação oficial solicitada explicitamente
+→ validações completas em dev/proxima-versao
+→ versão (se pedida) + merge dev/proxima-versao → main
+→ push de main
 → pnpm release:local (tauri build + atalho da Área de Trabalho)
+→ sincronizar dev/proxima-versao com main
 → nenhuma tag, release pública ou updater — não existem neste projeto
 ```
