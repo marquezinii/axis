@@ -1,0 +1,398 @@
+
+=== DIRECTORY TREE (max depth 3, source files only) ===
+.ai
+.ai\tasks
+.ai\tasks\.gitkeep
+.editorconfig
+.gitattributes
+.github
+.github\dependabot.yml
+.github\ISSUE_TEMPLATE
+.github\ISSUE_TEMPLATE\bug_report.yml
+.github\ISSUE_TEMPLATE\config.yml
+.github\PULL_REQUEST_TEMPLATE.md
+.github\workflows
+.github\workflows\ci.yml
+.gitignore
+.prettierignore
+.prettierrc.json
+.superpowers
+.superpowers\sdd
+.superpowers\sdd\2026-08-06-axis-v2-implementation
+.superpowers\sdd\2026-08-06-axis-v2-implementation\progress.md
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.1-report.md
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.1-review-package.txt
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.2-report.md
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.2-review-package.txt
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.3-report.md
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.3-review-package.txt
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.4-report.md
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.4-review-package.txt
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.4-review-verdict.txt
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.5-re-review-verdict.txt
+.superpowers\sdd\2026-08-06-axis-v2-implementation\task-1.5-report.md
+.vscode
+.vscode\extensions.json
+AI_RULES.md
+ARCHITECTURE.md
+archive
+archive\agentos
+archive\agentos\.gitignore
+archive\agentos\.nvmrc
+archive\agentos\.worktrees
+archive\agentos\.worktrees\agentos-v1-implementation
+archive\agentos\apps
+archive\agentos\apps\backend
+archive\agentos\apps\desktop
+archive\agentos\assets
+archive\agentos\assets\icon
+archive\agentos\docs
+archive\agentos\docs\superpowers
+archive\agentos\package-lock.json
+archive\agentos\package.json
+archive\agentos\packages
+archive\agentos\packages\shared
+archive\agentos\PROJECT_STATE.md
+archive\agentos\README.md
+archive\agentos\scripts
+archive\agentos\scripts\update-desktop-shortcut.ps1
+archive\agentos\tsconfig.base.json
+archive\README.md
+archive\skilldrop
+archive\skilldrop\skilldrop.bat
+archive\skilldrop\skilldrop.py
+archive\skilldrop\skilldrop_state.json
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+docs
+docs\codebase
+docs\codebase\.codebase-scan.txt
+docs\superpowers
+docs\superpowers\plans
+docs\superpowers\plans\2026-08-06-axis-v2-implementation.md
+docs\superpowers\specs
+docs\superpowers\specs\2026-08-06-axis-v2-unified-design.md
+index.html
+package.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+PROJECT_STATE.md
+public
+public\axis-icon.png
+README.md
+scripts
+scripts\sync-desktop-shortcut.ps1
+SECURITY.md
+src
+src\App.css
+src\App.tsx
+src\components
+src\components\workspace
+src\components\workspace\ChatView.tsx
+src\components\workspace\ProviderSelector.tsx
+src\components\workspace\SessionList.tsx
+src\components\workspace\WorkspacePanel.tsx
+src\hooks
+src\hooks\useChat.ts
+src\hooks\useSessions.ts
+src\main.tsx
+src\vite-env.d.ts
+src-tauri
+src-tauri\.gitignore
+src-tauri\build.rs
+src-tauri\capabilities
+src-tauri\capabilities\default.json
+src-tauri\Cargo.lock
+src-tauri\Cargo.toml
+src-tauri\gen
+src-tauri\gen\schemas
+src-tauri\gen\schemas\acl-manifests.json
+src-tauri\gen\schemas\capabilities.json
+src-tauri\gen\schemas\desktop-schema.json
+src-tauri\gen\schemas\windows-schema.json
+src-tauri\icons
+src-tauri\icons\128x128.png
+src-tauri\icons\128x128@2x.png
+src-tauri\icons\32x32.png
+src-tauri\icons\64x64.png
+src-tauri\icons\android
+src-tauri\icons\android\mipmap-anydpi-v26
+src-tauri\icons\android\mipmap-hdpi
+src-tauri\icons\android\mipmap-mdpi
+src-tauri\icons\android\mipmap-xhdpi
+src-tauri\icons\android\mipmap-xxhdpi
+src-tauri\icons\android\mipmap-xxxhdpi
+src-tauri\icons\android\values
+src-tauri\icons\axis-source.png
+src-tauri\icons\axis-square.png
+src-tauri\icons\icon.icns
+src-tauri\icons\icon.ico
+src-tauri\icons\icon.png
+src-tauri\icons\ios
+src-tauri\icons\ios\AppIcon-20x20@1x.png
+src-tauri\icons\ios\AppIcon-20x20@2x-1.png
+src-tauri\icons\ios\AppIcon-20x20@2x.png
+src-tauri\icons\ios\AppIcon-20x20@3x.png
+src-tauri\icons\ios\AppIcon-29x29@1x.png
+src-tauri\icons\ios\AppIcon-29x29@2x-1.png
+src-tauri\icons\ios\AppIcon-29x29@2x.png
+src-tauri\icons\ios\AppIcon-29x29@3x.png
+src-tauri\icons\ios\AppIcon-40x40@1x.png
+src-tauri\icons\ios\AppIcon-40x40@2x-1.png
+src-tauri\icons\ios\AppIcon-40x40@2x.png
+src-tauri\icons\ios\AppIcon-40x40@3x.png
+src-tauri\icons\ios\AppIcon-512@2x.png
+src-tauri\icons\ios\AppIcon-60x60@2x.png
+src-tauri\icons\ios\AppIcon-60x60@3x.png
+src-tauri\icons\ios\AppIcon-76x76@1x.png
+src-tauri\icons\ios\AppIcon-76x76@2x.png
+src-tauri\icons\ios\AppIcon-83.5x83.5@2x.png
+src-tauri\icons\Square107x107Logo.png
+src-tauri\icons\Square142x142Logo.png
+src-tauri\icons\Square150x150Logo.png
+src-tauri\icons\Square284x284Logo.png
+src-tauri\icons\Square30x30Logo.png
+src-tauri\icons\Square310x310Logo.png
+src-tauri\icons\Square44x44Logo.png
+src-tauri\icons\Square71x71Logo.png
+src-tauri\icons\Square89x89Logo.png
+src-tauri\icons\StoreLogo.png
+src-tauri\src
+src-tauri\src\agents.rs
+src-tauri\src\chat.rs
+src-tauri\src\lib.rs
+src-tauri\src\main.rs
+src-tauri\src\models.rs
+src-tauri\src\providers
+src-tauri\src\providers\claude.rs
+src-tauri\src\providers\mod.rs
+src-tauri\src\providers\opencode.rs
+src-tauri\src\skills.rs
+src-tauri\src\storage.rs
+src-tauri\tauri.conf.json
+src-tauri\tests
+src-tauri\tests\chat_tests.rs
+src-tauri\tests\storage_tests.rs
+tsconfig.json
+tsconfig.node.json
+vite.config.ts
+
+=== STACK DETECTION (manifest files) ===
+
+--- package.json ---
+{
+  "name": "axis",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "check": "tsc --noEmit && vite build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "release:local": "tauri build && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-desktop-shortcut.ps1",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-opener": "^2",
+    "lucide-react": "^1.28.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^5.2.0",
+    "prettier": "^3.5.3",
+    "typescript": "~7.0.2",
+    "vite": "^7.0.4"
+  }
+}
+
+--- pnpm-lock.yaml ---
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@tauri-apps/api':
+        specifier: ^2
+        version: 2.11.1
+      '@tauri-apps/plugin-opener':
+        specifier: ^2
+        version: 2.5.4
+      lucide-react:
+        specifier: ^1.28.0
+        version: 1.28.0(react@19.2.8)
+      react:
+        specifier: ^19.1.0
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.2.8(react@19.2.8)
+      react-markdown:
+        specifier: ^10.1.0
+        version: 10.1.0(@types/react@19.2.18)(react@19.2.8)
+    devDependencies:
+      '@tauri-apps/cli':
+        specifier: ^2
+        version: 2.11.4
+      '@types/react':
+        specifier: ^19.1.8
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.6
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.2.0
+        version: 5.2.0(vite@7.3.6)
+      prettier:
+        specifier: ^3.5.3
+        version: 3.9.6
+      typescript:
+        specifier: ~7.0.2
+        version: 7.0.2
+      vite:
+        specifier: ^7.0.4
+        version: 7.3.6
+
+packages:
+
+  '@babel/code-frame@7.29.7':
+    resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/compat-data@7.29.7':
+    resolution: {integrity: sha512-locTkQyKvwIEgBzVrn8693ebc97F2U8ZHjbXwDXJ5Fn2TCpNwTlKcaKLkdHop5c/icOFE7qt7Q9JC5hnKNa6Gg==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/core@7.29.7':
+    resolution: {integrity: sha512-RgHBCvtjbOK2gXSNBNIkNoEc9qoVEtau3hj8gEqKQuL3HZAibKarWFEI3Lfm6EYKkLalOh8eSrj9b+ch9H/VBA==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/generator@7.29.8':
+    resolution: {integrity: sha512-gZbepsdh3WDtgZKWL+vTPh71LSBrm/Y4/QDZBVCcYfmeTEEuoOYwlSy+G1StfJg+/Zy550u/3TATbm7qDbbMtg==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/helper-compilation-targets@7.29.7':
+    resolution: {integrity: sha512-wem6WaBj4NaVYVdNhLPPVacES6ZJ+KBBfSkTMD3YZxbP3rm3Di85tJU5ljaUNhaOynt+Aj0xruhYuzQBt8n71g==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/helper-globals@7.29.7':
+    resolution: {integrity: sha512-3nQVUAtvkKH9zahfWgw96Jc/uFOmjACE1kQz82E2lqWmHBgjzbNlsC22nuQTfahmWeQtTq5nQ/4Nnd2A1wj4zA==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/helper-module-imports@7.29.7':
+    resolution: {integrity: sha512-ejHwrQQYcm9xnTivShn2IDOlIzInN34AXskvq9QicvCtEzq1Vzclu/tKF8Jq1Cg8JG2GL6/EmjgsCT7lXepE3g==}
+    engines: {node: '>=6.9.0'}
+
+[TRUNCATED] Showing first 80 of 2174 lines.
+
+=== ENTRY POINTS ===
+No common entry points found. Check 'main' or 'scripts.start' in manifest files above.
+
+=== LINTING AND FORMATTING CONFIG ===
+Found: .prettierrc.json
+Found: .editorconfig
+Found: tsconfig.json
+
+=== ENVIRONMENT VARIABLE TEMPLATES ===
+No .env.example or .env.template found. Identify required environment variables by searching the code and config for environment variable reads.
+
+=== TODO / FIXME / HACK (production code only, test dirs excluded) ===
+None found.
+
+=== GIT RECENT COMMITS (last 20) ===
+1ab1aa6 docs: adota dev/proxima-versao como branch de integraÃ§Ã£o
+1e76ec3 docs: adiciona governanÃ§a e estado do projeto para agentes de IA
+e96c15e chore: final integration verification, all tests passing
+8883c6e chore: archive AgentOS and SkillDrop, bump version to 0.2.0
+50d3ada feat: integrate workspace and history panels, tab navigation, batch skill selection
+9b662d5 feat: add batch_install_github Tauri command
+4b24b8f feat: add SessionList component for history panel
+77ee578 feat: implement OpenCodeProvider via CLI spawn with line-by-line streaming
+23dcde8 feat: add ProviderSelector and WorkspacePanel with session start/recent sessions
+4007dec feat: add ChatView component with streaming, cancel, and file change preview
+22a5120 feat: add useSessions hook for session CRUD via Tauri IPC
+0b2997c feat: add useChat hook for Tauri event-based streaming chat
+894afdb fix: remove cancel tokens from ActiveSessions after streaming completes or errors
+9c07435 feat: add chat.rs orchestrator with Tauri commands for session management and streaming
+4eae87a feat: implement ClaudeProvider with Anthropic HTTP API SSE streaming
+92a1c52 feat: add chat SQLite tables and CRUD functions for sessions, messages, file_changes
+03c1430 feat: define ChatProvider trait, StreamEvent, ProviderError, and chat IPC types
+9b0de94 build: add chat provider dependencies (reqwest stream, tokio, eventsource-stream, async-trait)
+2554195 docs: elevate project README
+6843015 feat: elevate command center design
+
+=== HIGH-CHURN FILES (last 90 days, top 20) ===
+   7 src-tauri/Cargo.lock
+   7 src-tauri/Cargo.toml
+   5 src/App.tsx
+   5 src-tauri/src/lib.rs
+   5 src/App.css
+   4 package.json
+   3 PROJECT_STATE.md
+   3 src-tauri/src/models.rs
+   3 src-tauri/src/providers/mod.rs
+   3 README.md
+   3 pnpm-lock.yaml
+   3 index.html
+   3 src-tauri/src/skills.rs
+   2 .github/workflows/ci.yml
+   2 .superpowers/sdd/2026-08-06-axis-v2-implementation/progress.md
+   2 AI_RULES.md
+   2 src-tauri/tauri.conf.json
+   2 src-tauri/src/chat.rs
+   2 src-tauri/src/storage.rs
+   2 .prettierignore
+
+=== MONOREPO SIGNALS ===
+Monorepo tool detected: pnpm-workspace.yaml
+
+=== CODE METRICS ===
+Total files scanned: 270
+Total lines of code: 21636
+
+Files by language:
+  Other: 201
+  TypeScript: 42
+  Rust: 13
+  TypeScript/React: 12
+  JavaScript: 1
+  Python: 1
+
+Top 10 largest files:
+archive\agentos\apps\desktop\release\win-unpacked\AgentOS.exe: 220568.5KB
+archive\agentos\apps\desktop\release\AgentOS Setup 0.1.0.exe: 106723.1KB
+archive\agentos\apps\desktop\release\win-unpacked\dxcompiler.dll: 25016.5KB
+archive\agentos\apps\desktop\release\win-unpacked\LICENSES.chromium.html: 19837.8KB
+archive\agentos\apps\desktop\release\win-unpacked\icudtl.dat: 10621.6KB
+archive\agentos\apps\desktop\release\win-unpacked\libGLESv2.dll: 7836.0KB
+archive\agentos\apps\desktop\release\win-unpacked\resources.pak: 6980.6KB
+archive\agentos\apps\desktop\release\win-unpacked\vk_swiftshader.dll: 5373.5KB
+archive\agentos\apps\desktop\release\win-unpacked\d3dcompiler_47.dll: 4630.4KB
+archive\agentos\apps\desktop\release\win-unpacked\ffmpeg.dll: 2996.0KB
+
+=== CI/CD PIPELINES ===
+CI/CD: GitHub Actions
+
+=== CONTAINERS & ORCHESTRATION ===
+No containerization configs detected.
+
+=== SECURITY & COMPLIANCE ===
+Security: SECURITY.md
+
+=== PERFORMANCE & TESTING ===
+No performance testing configs detected.
+
+=== SCAN COMPLETE ===
