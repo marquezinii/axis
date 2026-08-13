@@ -337,6 +337,7 @@ pub fn discover(
                 let installed = storage::installation_hash(&path);
                 let managed = installed.is_some();
                 let modified = installed.as_deref().is_some_and(|h| h != content_hash);
+                let provenance = storage::installation_provenance(&path);
                 let files = WalkDir::new(dir)
                     .follow_links(false)
                     .max_depth(12)
@@ -357,11 +358,14 @@ pub fn discover(
                         name,
                         description,
                         path,
-                        source: if managed {
-                            "Axis Vault".into()
-                        } else {
-                            "Source unknown".into()
-                        },
+                        source: provenance
+                            .as_ref()
+                            .map(|(url, _)| url.clone())
+                            .unwrap_or_else(|| "Source unknown".into()),
+                        source_relative_path: provenance
+                            .as_ref()
+                            .map(|(_, rel)| rel.clone())
+                            .unwrap_or_default(),
                         agents: root_agents.clone(),
                         managed,
                         modified,

@@ -188,6 +188,17 @@ pub fn installation_hash(path: &str) -> Option<String> {
         .ok()
 }
 
+pub fn installation_provenance(path: &str) -> Option<(String, String)> {
+    connect()
+        .ok()?
+        .query_row(
+            "SELECT repository_url, relative_path FROM installations WHERE destination=?1",
+            [path],
+            |r| Ok((r.get(0)?, r.get(1)?)),
+        )
+        .ok()
+}
+
 pub fn save_installation(
     name: &str,
     repo: &str,

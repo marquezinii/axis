@@ -21,6 +21,7 @@ pub struct DetectedSkill {
     pub description: String,
     pub path: String,
     pub source: String,
+    pub source_relative_path: String,
     pub agents: Vec<String>,
     pub managed: bool,
     pub modified: bool,

@@ -47,6 +47,7 @@ type Skill = {
   description: string;
   path: string;
   source: string;
+  sourceRelativePath: string;
   agents: string[];
   managed: boolean;
   modified: boolean;
@@ -100,6 +101,8 @@ const empty: Dashboard = {
   firstRun: true,
   dataPath: 'Runtime desktop necessário',
 };
+const isGithubUrl = (value: string) =>
+  /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+/.test(value);
 const nav = [
   ['home', Home, 'Início'],
   ['agents', Bot, 'Agentes'],
@@ -500,9 +503,24 @@ function App() {
     setBusy(true);
     setError('');
     try {
+      const invalid = selectedSkills
+        .map((id) => dashboard.skills.find((s) => s.id === id))
+        .filter((s) => !s || !isGithubUrl(s.source));
+      if (invalid.length > 0) {
+        setError(
+          `Batch install requer origem GitHub conhecida: ${invalid
+            .map((s) => s?.name ?? 'skill desconhecida')
+            .join(', ')}. Instale individualmente pela tela de instalação.`,
+        );
+        return;
+      }
       const requests = selectedSkills.map((id) => {
-        const skill = dashboard.skills.find((s) => s.id === id);
-        return { url: skill?.source || '', skills: [skill?.name || ''], agents: ['codex', 'claude', 'opencode'] };
+        const skill = dashboard.skills.find((s) => s.id === id)!;
+        return {
+          url: skill.source,
+          skills: [skill.sourceRelativePath],
+          agents: ['codex', 'claude', 'opencode'],
+        };
       });
       await invoke<Dashboard>('batch_install_github', { requests });
       setSelectedSkills([]);

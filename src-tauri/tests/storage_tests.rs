@@ -38,4 +38,23 @@ mod tests {
         let sessions = storage::get_sessions(workspace_id).expect("get_sessions");
         assert!(sessions.iter().any(|s| s.id == id));
     }
+
+    #[test]
+    fn test_installation_provenance_roundtrip() {
+        let destination = format!("/tmp/axis-provenance-{}", uuid::Uuid::new_v4());
+        assert!(storage::installation_provenance(&destination).is_none());
+        storage::save_installation(
+            "provenance-test",
+            "https://github.com/owner/repo",
+            "main",
+            "skills/demo",
+            "abcdef",
+            "hash",
+            &destination,
+        )
+        .expect("save_installation should succeed");
+        let provenance = storage::installation_provenance(&destination).expect("provenance");
+        assert_eq!(provenance.0, "https://github.com/owner/repo");
+        assert_eq!(provenance.1, "skills/demo");
+    }
 }
